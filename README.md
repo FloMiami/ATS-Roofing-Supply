@@ -4,8 +4,10 @@
 
 A responsive, mobile-first front-end web application for a fictional roofing supply company, built as a final project for a web development course. This site showcases clean design, dynamic content, and modern UI components using HTML5, CSS3, Bootstrap 5, and vanilla JavaScript.
 
-### 🌐 Live Preview (optional)
-_You can include a link to your GitHub Pages deployment or preview link here._
+### 🌐 Live Preview 
+ 
+https://flomiami.github.io/ATS-Roofing-Supply/
+
 
 ---
 
@@ -32,9 +34,5 @@ _You can include a link to your GitHub Pages deployment or preview link here._
 
 ---
 
-### 📸 Screenshots (Optional)
-_Add a few image links or embedded screenshots here if desired._
 
----
 
-Let me know if you'd like to tweak the tone, add a project banner, or write a professional README intro — I’ve got your back.
