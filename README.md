@@ -1,38 +1,26 @@
+# ATS Roofing Supply
 
+A responsive roofing supply company website built with React, Vite, React Router, and Bootstrap. The app retains the original site's content, custom styling, and image assets. The quote form currently demonstrates a frontend-only submit confirmation; it does not save or send data.
 
-## 🏗️ ATS Roofing Supply — Front-End Website
+## Routes
 
-A responsive, mobile-first front-end web application for a fictional roofing supply company, built as a final project for a web development course. This site showcases clean design, dynamic content, and modern UI components using HTML5, CSS3, Bootstrap 5, and vanilla JavaScript.
+- `/` - Home
+- `/products` - Roofing products
+- `/about` - Company and team information
+- `/quote` - Contact and quote inquiry form
 
-### 🌐 Live Preview 
- 
-https://flomiami.github.io/ATS-Roofing-Supply/
+## Run locally
 
+```sh
+npm install
+npm run dev
+```
 
----
+Create a production build with `npm run build`, or serve it locally with `npm run preview`.
 
-### 🚀 Features
+## Technologies
 
-- 📱 Fully responsive design using **Bootstrap 5**
-- 🧭 Consistent and collapsible **navigation bar** across all pages
-- 🎨 Branded styling with custom **external CSS** and **Google Fonts**
-- ⚡ JavaScript-powered features including:
-  - Contact form with dynamic success message
-  - Roofing fact generator on the About Us page
-  - Optional dark mode toggle and back-to-top button
-- 🧩 Semantic HTML5 and accessible markup
-- 📂 Structured into 4 pages: Home, Products, About Us, Contact
-
----
-
-### 📁 Technologies
-
-- HTML5
-- CSS3 (External Stylesheets)
-- Bootstrap 5 (Responsive Layout and Components)
-- JavaScript (in external file `main.js`)
-
----
-
-
-
+- React and Vite
+- React Router
+- Bootstrap 5 installed through npm
+- Custom CSS and the existing image assets
