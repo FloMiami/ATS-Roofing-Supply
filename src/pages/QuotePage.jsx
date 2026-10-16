@@ -2,6 +2,34 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader.jsx';
 import { supabase } from '../lib/supabaseClient.js';
 
+function logProductLoadFailure(category, error = null) {
+  if (!import.meta.env.DEV) return;
+
+  const status = Number.isInteger(error?.status) ? error.status : null;
+  const code = typeof error?.code === 'string' && /^[A-Za-z0-9_-]{1,32}$/.test(error.code)
+    ? error.code
+    : null;
+
+  console.error('[quote] Product catalog request failed', { category, status, code });
+}
+
+function getProductLoadFailureCategory(error) {
+  const status = Number.isInteger(error?.status) ? error.status : null;
+  const code = typeof error?.code === 'string' ? error.code : '';
+  const message = typeof error?.message === 'string' ? error.message.toLowerCase() : '';
+
+  if (code === '42501' || status === 403 || /permission|row-level security|\brls\b/.test(message)) {
+    return 'RLS/permission error';
+  }
+  if (status === 401 || /invalid api.?key|invalid jwt/.test(message)) {
+    return 'authentication/API error';
+  }
+  if (status !== null && status >= 400) {
+    return 'failed HTTP request';
+  }
+  return 'authentication/API error';
+}
+
 export default function QuotePage() {
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -18,6 +46,7 @@ export default function QuotePage() {
 
     async function loadProducts() {
       if (!supabase) {
+        logProductLoadFailure('missing Supabase configuration');
         setProductLoadError('Product catalog is unavailable. Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the development server.');
         setIsLoadingProducts(false);
         return;
@@ -32,11 +61,13 @@ export default function QuotePage() {
         if (!isCurrent) return;
 
         if (error) {
+          logProductLoadFailure(getProductLoadFailureCategory(error), error);
           setProductLoadError('We could not load the product catalog. Please refresh the page or try again later.');
         } else {
           setProducts(data ?? []);
         }
-      } catch {
+      } catch (error) {
+        logProductLoadFailure('network/browser error', error);
         setProductLoadError('We could not load the product catalog. Please refresh the page or try again later.');
       } finally {
         if (isCurrent) setIsLoadingProducts(false);
