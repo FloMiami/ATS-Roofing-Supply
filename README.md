@@ -12,7 +12,7 @@ A responsive roofing supply company website built with React, Vite, React Router
 - `/admin` - Protected quote dashboard
 - `/admin/quotes/:id` - Protected quote details
 
-## Run locally
+##  Run locally
 
 ```sh
 npm install
