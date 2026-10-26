@@ -50,7 +50,8 @@ jobs:
       - name: Build site
         run: npm run build
         env:
-          VITE_BASE_PATH: /ATS-Roofing-Supply/
+          # The custom domain serves the app at the root, not under the repo name.
+          VITE_BASE_PATH: /
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 

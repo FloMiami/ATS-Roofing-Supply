@@ -29,7 +29,7 @@ The same email and text-length checks run inside the `submit_quote_request` data
 
 ## GitHub Pages deployment
 
-The `Deploy to GitHub Pages` workflow deploys pushes to `main` and can also be run with `workflow_dispatch`. It builds with the repository base path `/ATS-Roofing-Supply/`; local development defaults to `/`.
+The `Deploy to GitHub Pages` workflow deploys pushes to `main` and can also be run with `workflow_dispatch`. It builds for the root path used by `https://ats-roofing-supply.us`; local development also defaults to `/`.
 
 In the repository, add these browser-safe values under **Settings → Secrets and variables → Actions → Variables**:
 
@@ -38,7 +38,7 @@ In the repository, add these browser-safe values under **Settings → Secrets an
 
 These values are embedded in the built browser assets and are not privileged credentials. Never add a Supabase service-role or secret key to these variables. The workflow creates a `404.html` SPA fallback so clean React Router paths can render on direct navigation and refresh. GitHub Pages may still report an HTTP 404 status for those fallback requests.
 
-To enable deployment, select **GitHub Actions** as the Pages build and deployment source in **Settings → Pages**. Then merge or push the deployment workflow to `main`; no deployment is triggered from this feature branch by default.
+To enable deployment, select **GitHub Actions** as the Pages build and deployment source in **Settings → Pages**, then set `ats-roofing-supply.us` as the custom domain there. Pushes to `main` trigger deployment.
 
 ## Technologies
 
