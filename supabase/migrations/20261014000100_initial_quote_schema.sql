@@ -1,3 +1,4 @@
+-- Store each quote as a customer, a request, and the products they asked about.
 create table public.customers (
   id uuid primary key default gen_random_uuid(),
   full_name text not null check (char_length(btrim(full_name)) > 0),
@@ -6,6 +7,7 @@ create table public.customers (
   created_at timestamptz not null default now()
 );
 
+-- Keep the catalog separate so quote items can point to real products.
 create table public.products (
   id uuid primary key default gen_random_uuid(),
   name text not null unique check (char_length(btrim(name)) > 0),
@@ -13,6 +15,7 @@ create table public.products (
   created_at timestamptz not null default now()
 );
 
+-- One quote request belongs to one customer; its items live in quote_items below.
 create table public.quote_requests (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid not null references public.customers (id) on delete restrict,
@@ -23,6 +26,7 @@ create table public.quote_requests (
   updated_at timestamptz not null default now()
 );
 
+-- Save one row per product in a quote, with the requested quantity.
 create table public.quote_items (
   id uuid primary key default gen_random_uuid(),
   quote_request_id uuid not null references public.quote_requests (id) on delete cascade,
@@ -31,6 +35,7 @@ create table public.quote_items (
   created_at timestamptz not null default now()
 );
 
+-- These indexes help the dashboard find a customer's requests and sort the queue.
 create index customers_email_lower_idx on public.customers (lower(email));
 create index quote_requests_customer_id_idx on public.quote_requests (customer_id);
 create index quote_requests_status_idx on public.quote_requests (status);
@@ -38,6 +43,7 @@ create index quote_requests_created_at_idx on public.quote_requests (created_at 
 create index quote_items_quote_request_id_idx on public.quote_items (quote_request_id);
 create index quote_items_product_id_idx on public.quote_items (product_id);
 
+-- Refresh updated_at automatically whenever an admin changes a quote.
 create function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -54,6 +60,7 @@ before update on public.quote_requests
 for each row
 execute function public.set_updated_at();
 
+-- Add the starter catalog used by the public product list.
 insert into public.products (id, name, description)
 values
   (
@@ -72,6 +79,7 @@ values
     'Lightweight, slip-resistant material for extra waterproofing under shingles.'
   );
 
+-- Start with access locked down; the policies and RPC below grant only what is needed.
 alter table public.customers enable row level security;
 alter table public.products enable row level security;
 alter table public.quote_requests enable row level security;
@@ -92,6 +100,8 @@ for select
 to anon, authenticated
 using (true);
 
+-- Let the public submit a quote through one checked database function instead of
+-- granting direct access to customer, request, or quote-item tables.
 create function public.submit_quote_request(
   p_full_name text,
   p_email text,
@@ -111,6 +121,7 @@ declare
   v_customer_id uuid;
   v_quote_request_id uuid;
 begin
+  -- Don't save blank customer details.
   if p_full_name is null or pg_catalog.btrim(p_full_name) = '' then
     raise exception using errcode = '22023', message = 'Full name is required';
   end if;
@@ -119,6 +130,7 @@ begin
     raise exception using errcode = '22023', message = 'Email is required';
   end if;
 
+  -- Check the shape and contents of every requested product before writing any rows.
   if p_items is null or pg_catalog.jsonb_typeof(p_items) is distinct from 'array' then
     raise exception using errcode = '22023', message = 'Requested products must be an array';
   end if;
@@ -164,6 +176,7 @@ begin
     end if;
   end loop;
 
+  -- Save the customer and quote only after all fields and products pass validation.
   insert into public.customers (full_name, email, phone)
   values (pg_catalog.btrim(p_full_name), pg_catalog.btrim(p_email), p_phone)
   returning id into v_customer_id;
@@ -188,6 +201,7 @@ begin
 end;
 $$;
 
+-- The public can submit quotes, but cannot call internal helpers or edit tables directly.
 revoke all on function public.set_updated_at() from public, anon, authenticated;
 revoke all on function public.submit_quote_request(text, text, text, jsonb, text)
   from public, anon, authenticated;

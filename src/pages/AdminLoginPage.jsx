@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 
+// Sign staff in and only continue if the database says their account is approved.
 export default function AdminLoginPage() {
+  // The form keeps these values here until Supabase checks the sign-in.
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -10,6 +12,7 @@ export default function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Sign in first, then check the admin allowlist before opening the dashboard.
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage('');
@@ -41,6 +44,7 @@ export default function AdminLoginPage() {
     }
   }
 
+  // Keep staff login separate from the public site navigation.
   return (
     <main className="admin-login-page">
       <section className="admin-login-panel" aria-labelledby="admin-login-title">
@@ -49,6 +53,7 @@ export default function AdminLoginPage() {
         <h1 id="admin-login-title" className="h3 mb-2">Admin sign in</h1>
         <p className="text-muted mb-4">Use your approved staff account to manage quote requests.</p>
         <form onSubmit={handleSubmit}>
+          {/* Use the browser's password manager hints to make staff sign-in easier. */}
           <div className="mb-3">
             <label className="form-label" htmlFor="admin-email">Email</label>
             <input

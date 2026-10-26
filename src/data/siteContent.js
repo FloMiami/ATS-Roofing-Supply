@@ -5,6 +5,7 @@ import johnImage from '../../images/team1.jpg';
 import sarahImage from '../../images/team2.jpg';
 import carlosImage from '../../images/team3.jpg';
 
+// These are the marketing cards; the quote form loads the live catalog from Supabase instead.
 export const products = [
   {
     name: 'Architectural Shingles',
@@ -27,6 +28,7 @@ export const products = [
   },
 ];
 
+// Keep the team details in one list so AboutPage can render one card per person.
 export const teamMembers = [
   { name: 'John Doe', role: 'Founder & CEO', image: johnImage },
   { name: 'Sarah Smith', role: 'Operations Manager', image: sarahImage },

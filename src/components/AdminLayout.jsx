@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 
+// Give every admin page the same header and sign-out button.
 export default function AdminLayout() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   const navigate = useNavigate();
 
+  // Sign out through Supabase, and only leave the admin area when that succeeds.
   async function handleSignOut() {
     setIsSigningOut(true);
     setSignOutError('');
@@ -19,6 +21,7 @@ export default function AdminLayout() {
     navigate('/admin/login', { replace: true });
   }
 
+  // The admin pages share this header; Outlet is where the selected page appears.
   return (
     <div className="admin-shell">
       <header className="admin-topbar">

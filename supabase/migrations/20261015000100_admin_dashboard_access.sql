@@ -1,3 +1,4 @@
+-- Only accounts listed here can view or update customer quote information.
 create table public.admin_users (
   user_id uuid primary key references auth.users (id) on delete cascade,
   created_at timestamptz not null default now()
@@ -6,6 +7,7 @@ create table public.admin_users (
 alter table public.admin_users enable row level security;
 revoke all on table public.admin_users from public, anon, authenticated;
 
+-- Reuse the allowlist check in the admin screen and the table access policies.
 create function public.is_admin()
 returns boolean
 language sql
@@ -20,6 +22,7 @@ as $$
   );
 $$;
 
+-- Signed-in users can check their own access; only approved admins can read or update quotes.
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
 

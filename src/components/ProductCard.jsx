@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+
+// Show the same product details everywhere, with a shorter description on the home page.
 export default function ProductCard({ product, featured = false }) {
   const description = featured ? product.featuredDescription : product.description;
 
@@ -8,7 +11,8 @@ export default function ProductCard({ product, featured = false }) {
         <div className="card-body">
           <h2 className="card-title h5">{product.name}</h2>
           <p className="card-text">{description}</p>
-          {!featured && <a href="#" className="btn btn-accent">View Details</a>}
+          {/* The featured home card is a preview; the full catalog cards link to the quote form. */}
+          {!featured && <Link to="/quote" className="btn btn-accent">Request a Quote</Link>}
         </div>
       </article>
     </div>

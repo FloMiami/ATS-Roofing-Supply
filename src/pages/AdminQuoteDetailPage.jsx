@@ -4,12 +4,15 @@ import { supabase } from '../lib/supabaseClient.js';
 
 const statuses = ['new', 'contacted', 'quoted', 'approved', 'rejected'];
 
+// Use a longer date here because this screen is about one specific request.
 function formatDate(value) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'long', timeStyle: 'short' }).format(new Date(value));
 }
 
+// Show one quote, its products and contact details, and let approved admins change its status.
 export default function AdminQuoteDetailPage() {
   const { id } = useParams();
+  // Track loading, saving, and errors separately so the right message appears at the right time.
   const [quote, setQuote] = useState(null);
   const [loadState, setLoadState] = useState('loading');
   const [isSaving, setIsSaving] = useState(false);
@@ -19,6 +22,7 @@ export default function AdminQuoteDetailPage() {
   useEffect(() => {
     let isCurrent = true;
 
+    // Read one quote and its related customer and products using the ID in the page URL.
     async function loadQuote() {
       if (!supabase) {
         setLoadState('error');
@@ -46,6 +50,7 @@ export default function AdminQuoteDetailPage() {
     return () => { isCurrent = false; };
   }, [id]);
 
+  // Only save a real status change, and keep the old value if the database rejects it.
   async function updateStatus(event) {
     const nextStatus = event.target.value;
     setStatusError('');
@@ -70,6 +75,7 @@ export default function AdminQuoteDetailPage() {
     }
   }
 
+  // Don't try to render quote fields until the request has actually loaded.
   if (loadState === 'loading') return <p role="status">Loading quote details…</p>;
   if (loadState === 'error') {
     return <div className="alert alert-danger" role="alert">Quote details could not be loaded. Confirm admin access and try again.</div>;
@@ -78,6 +84,7 @@ export default function AdminQuoteDetailPage() {
     return <div className="alert alert-warning" role="alert">This quote request was not found.</div>;
   }
 
+  // A joined customer can come back as an object or a one-item array.
   const customer = Array.isArray(quote.customer) ? quote.customer[0] : quote.customer;
 
   return (
@@ -91,6 +98,7 @@ export default function AdminQuoteDetailPage() {
         </div>
       </div>
 
+      {/* Keep contact details, quote status/message, and requested items easy to scan separately. */}
       <div className="row g-4 mt-1">
         <section className="col-lg-5" aria-labelledby="customer-heading">
           <div className="admin-detail-section h-100">
@@ -118,6 +126,7 @@ export default function AdminQuoteDetailPage() {
           </div>
         </section>
 
+        {/* Show each requested product and its quantity from the quote's item list. */}
         <section className="col-12" aria-labelledby="products-heading">
           <div className="admin-detail-section">
             <h2 id="products-heading" className="h5">Products requested</h2>

@@ -2,15 +2,18 @@ import PageHeader from '../components/PageHeader.jsx';
 import TeamMemberCard from '../components/TeamMemberCard.jsx';
 import { teamMembers } from '../data/siteContent.js';
 
+// Show the company story, team, and the reasons customers can work with ATS.
 export default function AboutPage() {
   return (
     <>
+      {/* A shared banner keeps this page in step with Products and Quote. */}
       <PageHeader
         title="About ATS Roofing Supply"
         subtitle="Reliable products. Exceptional service. Built to weather any storm."
       />
       <section className="py-5">
         <div className="container">
+          {/* Start with the company story and the reasons customers might choose ATS. */}
           <div className="row">
             <div className="col-lg-6 mb-4">
               <h2>Who We Are</h2>
@@ -41,6 +44,7 @@ export default function AboutPage() {
             </p>
             <p>We might not wear hard hats every day — but we think like roofers.</p>
           </div>
+          {/* Build the team cards from the shared team list instead of repeating card markup. */}
           <div className="row text-center mt-4">
             {teamMembers.map((member) => <TeamMemberCard key={member.name} member={member} />)}
           </div>

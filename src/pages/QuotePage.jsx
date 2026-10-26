@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PageHeader from '../components/PageHeader.jsx';
 import { supabase } from '../lib/supabaseClient.js';
 
+// Keep noisy request details in the developer console, not in customer-facing messages.
 function logProductLoadFailure(category, error = null) {
   if (!import.meta.env.DEV) return;
 
@@ -13,6 +14,7 @@ function logProductLoadFailure(category, error = null) {
   console.error('[quote] Product catalog request failed', { category, status, code });
 }
 
+// Give the console a useful failure category without exposing Supabase error text to visitors.
 function getProductLoadFailureCategory(error) {
   const status = Number.isInteger(error?.status) ? error.status : null;
   const code = typeof error?.code === 'string' ? error.code : '';
@@ -30,7 +32,9 @@ function getProductLoadFailureCategory(error) {
   return 'authentication/API error';
 }
 
+// Load the product choices, check the form, and submit a quote request safely.
 export default function QuotePage() {
+  // These values control the catalog, the form, and the message shown after a submit.
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productLoadError, setProductLoadError] = useState('');
@@ -44,6 +48,7 @@ export default function QuotePage() {
   useEffect(() => {
     let isCurrent = true;
 
+    // The form needs the live product IDs from Supabase when it builds the quote request.
     async function loadProducts() {
       if (!supabase) {
         logProductLoadFailure('missing Supabase configuration');
@@ -60,6 +65,7 @@ export default function QuotePage() {
 
         if (!isCurrent) return;
 
+        // Show one friendly message for failures, whether the request was rejected or threw.
         if (error) {
           logProductLoadFailure(getProductLoadFailureCategory(error), error);
           setProductLoadError('We could not load the product catalog. Please refresh the page or try again later.');
@@ -78,6 +84,7 @@ export default function QuotePage() {
     return () => { isCurrent = false; };
   }, []);
 
+  // Keep the visible form state in sync as someone edits a field.
   function updateField(event) {
     const { name, value } = event.target;
     setFormValues((currentValues) => ({ ...currentValues, [name]: value }));
@@ -86,6 +93,7 @@ export default function QuotePage() {
     setIsSubmitted(false);
   }
 
+  // Add a checked product with quantity 1, or remove it from the request.
   function toggleProduct(productId, isSelected) {
     setSelectedProducts((currentProducts) => {
       const updatedProducts = { ...currentProducts };
@@ -101,6 +109,7 @@ export default function QuotePage() {
     setIsSubmitted(false);
   }
 
+  // Store quantity as typed text so an empty field can be corrected before submit.
   function updateQuantity(productId, quantity) {
     setSelectedProducts((currentProducts) => ({ ...currentProducts, [productId]: quantity }));
     setValidationError('');
@@ -108,6 +117,7 @@ export default function QuotePage() {
     setIsSubmitted(false);
   }
 
+  // Check every value before sending anything to Supabase.
   async function handleSubmit(event) {
     event.preventDefault();
     setValidationError('');
@@ -118,14 +128,28 @@ export default function QuotePage() {
     const email = formValues.email.trim();
     const selectedEntries = Object.entries(selectedProducts);
 
+    // Start with the contact details and keep the same size limits enforced by the database.
     if (!fullName) {
       setValidationError('Enter your full name.');
       return;
     }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (fullName.length > 200) {
+      setValidationError('Your name must be 200 characters or fewer.');
+      return;
+    }
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setValidationError('Enter a valid email address.');
       return;
     }
+    if (formValues.phone.trim().length > 40) {
+      setValidationError('Your phone number must be 40 characters or fewer.');
+      return;
+    }
+    if (formValues.message.trim().length > 5000) {
+      setValidationError('Your message must be 5,000 characters or fewer.');
+      return;
+    }
+    // A quote needs at least one item; quantities must fit the database integer column.
     if (selectedEntries.length === 0) {
       setValidationError('Select at least one product for your quote.');
       return;
@@ -140,16 +164,19 @@ export default function QuotePage() {
       setValidationError('Enter a positive whole-number quantity for every selected product (up to 2,147,483,647).');
       return;
     }
+    // Don't try a network call when the app was started without its Supabase settings.
     if (!supabase) {
       setSubmissionError('Quote submission is unavailable until Supabase is configured.');
       return;
     }
 
+    // Send only the product IDs and numeric quantities that the database RPC expects.
     const p_items = selectedEntries.map(([productId, quantity]) => ({
       product_id: productId,
       quantity: Number(quantity),
     }));
 
+    // Prevent duplicate clicks, and keep a failed form filled in so it can be retried.
     setIsSubmitting(true);
     try {
       const { error } = await supabase.rpc('submit_quote_request', {
@@ -174,30 +201,34 @@ export default function QuotePage() {
 
   return (
     <>
+      {/* The header gives the form a clear starting point before the contact fields. */}
       <PageHeader title="Request a Quote" subtitle="Let’s talk roofing — we’re here to help!" />
       <section className="py-5">
         <div className="container">
           <div className="row">
             <div className="col-lg-7 mb-4">
               <h2 className="h4">Send Us a Message</h2>
+              {/* noValidate lets handleSubmit show the same friendly messages for each error. */}
               <form onSubmit={handleSubmit} noValidate>
+                {/* maxLength gives quick feedback; handleSubmit checks the same limits on submit. */}
                 <div className="mb-3">
                   <label htmlFor="fullName" className="form-label">Full Name</label>
-                  <input type="text" className="form-control" id="fullName" name="fullName" autoComplete="name" value={formValues.fullName} onChange={updateField} required />
+                  <input type="text" className="form-control" id="fullName" name="fullName" autoComplete="name" maxLength={200} value={formValues.fullName} onChange={updateField} required />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email Address</label>
-                  <input type="email" className="form-control" id="email" name="email" autoComplete="email" value={formValues.email} onChange={updateField} required />
+                  <input type="email" className="form-control" id="email" name="email" autoComplete="email" maxLength={254} value={formValues.email} onChange={updateField} required />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="phone" className="form-label">Phone Number</label>
-                  <input type="tel" className="form-control" id="phone" name="phone" autoComplete="tel" value={formValues.phone} onChange={updateField} />
+                  <input type="tel" className="form-control" id="phone" name="phone" autoComplete="tel" maxLength={40} value={formValues.phone} onChange={updateField} />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="message" className="form-label">Your Message <span className="text-muted">(optional)</span></label>
-                  <textarea className="form-control" id="message" name="message" rows="4" value={formValues.message} onChange={updateField} />
+                  <textarea className="form-control" id="message" name="message" rows="4" maxLength={5000} value={formValues.message} onChange={updateField} />
                 </div>
 
+                {/* Product choices come from Supabase, so show loading and failure states here too. */}
                 <fieldset className="mb-4">
                   <legend className="h5">Products and Quantities</legend>
                   {isLoadingProducts && <p role="status">Loading products…</p>}
@@ -242,6 +273,7 @@ export default function QuotePage() {
                   })}
                 </fieldset>
 
+                {/* Keep validation, request failure, and success messages separate and easy to spot. */}
                 {validationError && <div className="alert alert-danger" role="alert">{validationError}</div>}
                 {submissionError && <div className="alert alert-danger" role="alert">{submissionError}</div>}
                 {isSubmitted && (
@@ -254,6 +286,7 @@ export default function QuotePage() {
                 </button>
               </form>
             </div>
+            {/* Give visitors the store's contact details alongside the form. */}
             <div className="col-lg-5">
               <h2 className="h4">Our Location</h2>
               <p>

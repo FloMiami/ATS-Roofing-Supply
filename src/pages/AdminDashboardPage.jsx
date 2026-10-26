@@ -4,17 +4,21 @@ import { supabase } from '../lib/supabaseClient.js';
 
 const statuses = ['new', 'contacted', 'quoted', 'approved', 'rejected'];
 
+// Turn the database timestamp into a date the person viewing the dashboard expects.
 function formatDate(value) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
+// Load quote summaries and show the current workload by status.
 export default function AdminDashboardPage() {
+  // Keep loading separate from an empty result so the page can explain each case clearly.
   const [quotes, setQuotes] = useState([]);
   const [loadState, setLoadState] = useState('loading');
 
   useEffect(() => {
     let isCurrent = true;
 
+    // Load the latest quote summaries once; ignore the response if this page has closed.
     async function loadQuotes() {
       if (!supabase) {
         setLoadState('error');
@@ -51,6 +55,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* These counts help staff see the queue without opening each request. */}
       <section className="admin-status-grid" aria-label="Quote totals by status">
         {statuses.map((status) => (
           <article className="admin-status-tile" key={status}>
@@ -61,6 +66,7 @@ export default function AdminDashboardPage() {
         ))}
       </section>
 
+      {/* Show one clear state at a time: loading, trouble, empty queue, or the quote table. */}
       {loadState === 'loading' && <p className="py-4" role="status">Loading quote requests…</p>}
       {loadState === 'error' && (
         <div className="alert alert-danger" role="alert">
@@ -74,6 +80,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
       {loadState === 'loaded' && quotes.length > 0 && (
+        // Supabase returns customer joins as an object or a one-item array, so handle either.
         <div className="admin-table-wrap">
           <table className="table align-middle admin-quote-table mb-0">
             <thead>

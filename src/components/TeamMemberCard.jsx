@@ -1,3 +1,4 @@
+// Keep each person's photo and role in the same card layout on the About page.
 export default function TeamMemberCard({ member }) {
   return (
     <div className="col-md-4 mb-4">

@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient.js';
 
+// Stop signed-out or unapproved accounts before they can open an admin page.
 export default function AdminGate() {
+  // Keep the states separate so a signed-in non-admin isn't mistaken for a network error.
   const [access, setAccess] = useState('checking');
   const location = useLocation();
 
   useEffect(() => {
     let isCurrent = true;
 
+    // A valid sign-in is not enough: ask the database allowlist before showing admin pages.
     async function verifySession(session) {
       if (!session) {
         if (isCurrent) setAccess('unauthenticated');
@@ -29,6 +32,7 @@ export default function AdminGate() {
       return undefined;
     }
 
+    // Check the saved session on page load and repeat the check after sign-in or sign-out.
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
         if (isCurrent) setAccess('error');
@@ -52,6 +56,7 @@ export default function AdminGate() {
   }
 
   if (access === 'unauthenticated') {
+    // Remember the page they wanted so login can send them back afterward.
     return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
   }
 

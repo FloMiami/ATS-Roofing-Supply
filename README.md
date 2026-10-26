@@ -21,6 +21,12 @@ npm run dev
 
 Create a production build with `npm run build`, or serve it locally with `npm run preview`.
 
+## Quote form safeguards
+
+The quote form validates required name and email values, checks the email format, requires at least one product, and accepts only positive whole-number quantities within the database integer limit. It also limits names to 200 characters, emails to 254, phone numbers to 40, and messages to 5,000. Invalid values are rejected before submission; database and network failures show an error instead of crashing the page.
+
+The same email and text-length checks run inside the `submit_quote_request` database RPC, so callers cannot bypass them by skipping the browser form. Quote values are displayed as normal React text, which React escapes rather than interpreting as HTML.
+
 ## GitHub Pages deployment
 
 The `Deploy to GitHub Pages` workflow deploys pushes to `main` and can also be run with `workflow_dispatch`. It builds with the repository base path `/ATS-Roofing-Supply/`; local development defaults to `/`.
