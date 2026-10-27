@@ -1,9 +1,9 @@
 import shinglesImage from '../../images/architectural-shingles.jpg';
 import sealantImage from '../../images/roof-sealant.jpg';
 import underlaymentImage from '../../images/underlayment-roll.jpg';
-import johnImage from '../../images/team1.jpg';
-import sarahImage from '../../images/team2.jpg';
-import carlosImage from '../../images/team3.jpg';
+import michaelImage from '../../images/team1.jpg';
+import emilyImage from '../../images/team2.jpg';
+import miguelImage from '../../images/team3.jpg';
 
 // These are the marketing cards; the quote form loads the live catalog from Supabase instead.
 export const products = [
@@ -30,7 +30,7 @@ export const products = [
 
 // Keep the team details in one list so AboutPage can render one card per person.
 export const teamMembers = [
-  { name: 'John Doe', role: 'Founder & CEO', image: johnImage },
-  { name: 'Sarah Smith', role: 'Operations Manager', image: sarahImage },
-  { name: 'Carlos Rivera', role: 'Product Specialist', image: carlosImage },
+  { name: 'Michael Bennett', role: 'Founder & CEO', image: michaelImage },
+  { name: 'Emily Carter', role: 'Operations Manager', image: emilyImage },
+  { name: 'Miguel Torres', role: 'Product Specialist', image: miguelImage },
 ];
