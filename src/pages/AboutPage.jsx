@@ -1,9 +1,24 @@
+import { useState } from 'react';
 import PageHeader from '../components/PageHeader.jsx';
 import TeamMemberCard from '../components/TeamMemberCard.jsx';
 import { teamMembers } from '../data/siteContent.js';
 
+const roofingFacts = [
+  'Roof flashing helps direct water away from joints, chimneys, and roof penetrations.',
+  'Underlayment sits beneath roof shingles as an additional water-resistant layer.',
+  'Roof valleys collect water from two intersecting roof slopes and channel it toward the gutters.',
+  'Architectural shingles have a dimensional appearance created by multiple layers of material.',
+];
+
 // Show the company story, team, and the reasons customers can work with ATS.
 export default function AboutPage() {
+  const [fact, setFact] = useState('');
+
+  function showRandomFact() {
+    const randomIndex = Math.floor(Math.random() * roofingFacts.length);
+    setFact(roofingFacts[randomIndex]);
+  }
+
   return (
     <>
       {/* A shared banner keeps this page in step with Products and Quote. */}
@@ -49,8 +64,10 @@ export default function AboutPage() {
             {teamMembers.map((member) => <TeamMemberCard key={member.name} member={member} />)}
           </div>
           <div className="text-center mt-5">
-            <button type="button" id="factBtn" className="btn btn-accent">Tell Me a Roofing Fact</button>
-            <p id="factOutput" className="mt-3 fw-medium" />
+            <button type="button" id="factBtn" className="btn btn-accent" onClick={showRandomFact}>
+              Tell Me a Roofing Fact
+            </button>
+            <p id="factOutput" className="mt-3 fw-medium">{fact}</p>
           </div>
         </div>
       </section>
