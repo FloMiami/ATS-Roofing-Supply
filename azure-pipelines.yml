@@ -15,7 +15,23 @@ steps:
     versionSpec: '20.x'
   displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+- script:  npm ci
+  displayName: 'Install project packages'
+
+- script: npm run build
+  displayName: 'Build website'
+  env:
+    VITE_BASE_PATH: /
+    VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
+    VITE_SUPABASE_ANON_KEY: $(VITE_SUPABASE_ANON_KEY)
+
+
+- task: AzureStaticWebApp@0
+  displayName: 'Publish website to Azure'
+  inputs:
+   app_location: 'dist'
+   api_location: ''
+   output_location: ''
+   skip_app_build: true
+   azure_static_web_apps_api_token: $(deployment_token)
+
